@@ -21,5 +21,4 @@ func main() {
 	defer logRedirect.OFF()
 
 	log.Printf("%v\n", jsonConfig.Conf)
-
 }
