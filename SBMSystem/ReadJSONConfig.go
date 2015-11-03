@@ -14,6 +14,7 @@ type ReadJSONConfig struct {
 	Conf        struct {
 		PG_DSN              string
 		MY_DSN              string
+		SQLite_DB           string
 		AST_SQLite_DB       string
 		AST_CID_Group       string
 		AST_Num_Start       string
@@ -38,7 +39,6 @@ type ReadJSONConfig struct {
 		WLB_LDAP_ATTR       [][]string
 		WLB_SQL_PreFetch    string
 		WLB_MailBT          string
-		WLB_SQLite_DB       string
 		WLB_HTML_Title      string
 		AD_LDAP             [][]string
 		AD_ScriptDir        string
@@ -64,6 +64,10 @@ func (_s *ReadJSONConfig) Init() {
 	fmt.Printf("       Daemon mode: %s\n", _s.Daemon_mode)
 	fmt.Printf("\n")
 	fmt.Printf("\n")
+}
+
+func (_s *ReadJSONConfig) Update() {
+	_s._readConfigFile()
 }
 
 func (_s *ReadJSONConfig) _parseCommandLine() {
