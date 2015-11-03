@@ -86,8 +86,7 @@ func (_s PidFile) _check(conf ReadJSONConfig) {
 			return
 		}
 
-		log.Printf("<< ! Another copy of the program with PID %d is running! Exiting... ! >>", pid_read_int)
-		os.Exit(1)
+		log.Fatalf("\t<< ! Another copy of the program with PID %d is running! Exiting... ! >>\n\n\n", pid_read_int)
 	} else {
 		log.Printf("WR5/ > Remove old pid file")
 		err = os.Remove(conf.Conf.PID_File)

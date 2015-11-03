@@ -3,7 +3,8 @@ package SBMSystem
 import (
 	"encoding/json"
 	"flag"
-	"log"
+	"fmt"
+	//"log"
 	"os"
 )
 
@@ -45,6 +46,7 @@ type ReadJSONConfig struct {
 		TRANS_POS           [][]string
 		SABRealm            string
 		WLB_DavDNTreeDepLev int
+		LogLevel            int
 	}
 }
 
@@ -56,13 +58,12 @@ func (_s *ReadJSONConfig) Init() {
 	_s._parseCommandLine()
 	_s._readConfigFile()
 
-	log.Printf(".\n")
-	log.Printf("Configuration file: %s\n", _s.Config_file)
-	log.Printf("          Log file: %s\n", _s.Conf.LOG_File)
-	log.Printf("          PID file: %s\n", _s.Conf.PID_File)
-	log.Printf("       Daemon mode: %s\n", _s.Daemon_mode)
-	log.Printf("Go!\n")
-	log.Printf(".\n")
+	fmt.Printf("Configuration file: %s\n", _s.Config_file)
+	fmt.Printf("          Log file: %s\n", _s.Conf.LOG_File)
+	fmt.Printf("          PID file: %s\n", _s.Conf.PID_File)
+	fmt.Printf("       Daemon mode: %s\n", _s.Daemon_mode)
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 }
 
 func (_s *ReadJSONConfig) _parseCommandLine() {
@@ -71,18 +72,22 @@ func (_s *ReadJSONConfig) _parseCommandLine() {
 	flag.Parse()
 	_s.Config_file = *cp
 	_s.Daemon_mode = *dp
+
+	//fmt.Println(*cp, "\n", *dp, "\n", os.Args, "\n")
 }
 
 func (_s *ReadJSONConfig) _readConfigFile() {
 	f, err := os.Open(_s.Config_file)
 	if err != nil {
-		log.Fatalf("Error open Configuration file: %s (%v)\n", _s.Config_file, err)
+		fmt.Printf("Error open Configuration file: %s (%v)\n", _s.Config_file, err)
+		os.Exit(1)
 	}
 
 	c := json.NewDecoder(f)
 	err = c.Decode(&_s.Conf)
 	if err != nil {
-		log.Fatalf("Error read Configuration file: %s (%v)\n", _s.Config_file, err)
+		fmt.Printf("Error read Configuration file: %s (%v)\n", _s.Config_file, err)
+		os.Exit(2)
 	}
 	f.Close()
 }
