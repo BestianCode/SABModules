@@ -2,7 +2,6 @@ package SBMSystem
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -10,20 +9,20 @@ import (
 )
 
 func Exit(conf ReadJSONConfig, signalType os.Signal, pid PidFile) {
-	var logRedirect LogFile
+	var rLog LogFile
 
-	logRedirect.ON(conf)
-	defer logRedirect.OFF()
+	rLog.ON(conf)
+	defer rLog.OFF()
 
-	log.Println(".")
-	log.Println("..")
-	log.Println("...")
-	log.Println("Exit command received. Exiting...")
-	log.Println("Signal type: ", signalType)
-	log.Println("Bye...")
-	log.Println("...")
-	log.Println("..")
-	log.Println(".")
+	rLog.Log(".")
+	rLog.Log("..")
+	rLog.Log("...")
+	rLog.Log("Exit command received. Exiting...")
+	rLog.Log("Signal type: ", signalType)
+	rLog.Log("Bye...")
+	rLog.Log("...")
+	rLog.Log("..")
+	rLog.Log(".")
 
 	pid.OFF(conf)
 

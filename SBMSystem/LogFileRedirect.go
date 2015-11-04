@@ -1,8 +1,10 @@
 package SBMSystem
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 const (
@@ -34,24 +36,27 @@ func (_s *LogFile) ON(conf ReadJSONConfig) {
 
 	_s.lineLog = log.New(_s.flog, "", log.Ldate|log.Ltime)
 
-	if _s.LL > 1 {
-		log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	} else {
-		log.SetFlags(log.Ldate | log.Ltime)
-	}
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	log.SetOutput(_s.flog)
 }
 
 func (_s *LogFile) OFF() {
 	var err error
+	log.SetOutput(os.Stdout)
+	_s.lineLog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	err = _s.flog.Close()
 	if err != nil {
 		log.Fatalf("Error close log file: (%v)\n", err)
 	}
 }
 
-func (_s *LogFile) Log(msg string) {
-	_s.lineLog.Println(msg)
+func (_s *LogFile) Log(msg ...interface{}) {
+	var message = string("")
+	for _, x := range msg {
+		message = fmt.Sprintf("%s %v", message, x)
+	}
+	message = strings.Trim(message, " ")
+	_s.lineLog.Printf("%v", message)
 }
 
 func (_s *LogFile) Hello(pName, pVer string) {

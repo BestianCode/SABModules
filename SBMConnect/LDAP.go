@@ -24,7 +24,7 @@ func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig) int {
 
 	for {
 		if attemptCounter > len(conf.Conf.LDAP_URL)*2 {
-			log.Printf("LDAP Init SRV ***** Error connect to all LDAP servers...")
+			log.Printf("LDAP Init SRV ***** Error connect to all LDAP servers !!!")
 			return -1
 		}
 
