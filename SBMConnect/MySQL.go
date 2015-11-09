@@ -2,6 +2,7 @@ package SBMConnect
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	// MySQL
@@ -36,4 +37,25 @@ func (_s *MySQL) Init(conf SBMSystem.ReadJSONConfig, initDB string) int {
 
 func (_s *MySQL) Close() {
 	_s.D.Close()
+}
+
+func (_s *MySQL) QSimple(query ...interface{}) int {
+	var (
+		i       int
+		queryGo = string("")
+	)
+	for _, x := range query {
+		queryGo = fmt.Sprintf("%s%v", queryGo, x)
+	}
+	res, err := _s.D.Query(queryGo)
+	if err != nil {
+		log.Printf("SQL::Query() QSimple error: %v\n", err)
+		log.Printf("Query: %s\n", queryGo)
+		return -1
+	}
+
+	res.Next()
+	res.Scan(&i)
+
+	return i
 }
