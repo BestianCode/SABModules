@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 	//"regexp"
 	"strings"
 
@@ -138,15 +139,68 @@ func (_s *AAMI) Mute(conf, number, mode string) int {
 	return 0
 }
 
+func (_s *AAMI) List() []map[string]string {
+	var (
+		z []map[string]string
+		i int
+	)
+
+	cch := make(chan []map[string]string)
+	cb := func(m gami.Message) {
+		if m["EventList"] == "Complete" || m["Response"] == "Error" {
+			//fmt.Printf("DEBUG: %v\n\n", z)
+			cch <- z
+			_s.G.DelCallback(m)
+		} else {
+			x := make(map[string]string, len(m))
+			for x1, x2 := range m {
+				x[x1] = x2
+			}
+			if x["Event"] == "ConfbridgeListRooms" && len(x["Conference"]) > 0 {
+				z = append(z, x)
+			}
+		}
+	}
+
+	for i = 0; i < 10; i++ {
+		m := gami.Message{"Action": "ConfbridgeListRooms"}
+		_s.G.HoldCallbackAction(m, &cb)
+
+		for x := range <-cch {
+			if 1 != 1 {
+				fmt.Println("1", x)
+			}
+		}
+
+		if len(z) == len(_s.Query("confbridge list")) {
+			break
+		}
+		fmt.Println("DEBUG: ConfList read error! Try again!")
+		time.Sleep(time.Second)
+		z = nil
+	}
+
+	if i >= 10 {
+		fmt.Println("DEBUG: ConfList read error! Stop... :(", i)
+		return nil
+	}
+
+	return z
+}
+
 func (_s *AAMI) _getCh(conf, number string) (string, int) {
 	x := _s.Query("confbridge list", conf)
 	if x == nil {
 		return "", -1
 	}
 	for i := 0; i < len(x); i++ {
-		if SBMText.PLNModify(x[i][astNNumber]) == SBMText.PSNModify(number) {
+		if x[i][astNNumber] == _s._pnModify(number) || x[i][astNNumber] == number {
 			return x[i][astNChannel], 0
 		}
 	}
 	return "", -1
+}
+
+func (_s *AAMI) _pnModify(x string) string {
+	return x
 }
