@@ -47,13 +47,24 @@ type ReadJSONConfig struct {
 		SABRealm            string
 		WLB_DavDNTreeDepLev int
 		LogLevel            int
+		UDR_WatchList       [][]string
+		UDR_Shell           string
+		UDR_ShellExecParam  string
 	}
 }
 
-func (_s *ReadJSONConfig) Init() {
-	_s.Conf.LOG_File = "./AmnesiacDefault.log" // Default log file
-	_s.Config_file = "./AmnesiacDefault.json"  // Default configuration file
-	_s.Daemon_mode = "NO"                      // Default start in foreground
+func (_s *ReadJSONConfig) Init(defLog, defCFG string) {
+	if defLog == "" {
+		_s.Conf.LOG_File = "./AmnesiacDefault.log" // Default log file
+	} else {
+		_s.Conf.LOG_File = defLog
+	}
+	if defCFG == "" {
+		_s.Config_file = "./AmnesiacDefault.json" // Default configuration file
+	} else {
+		_s.Config_file = defCFG
+	}
+	_s.Daemon_mode = "NO" // Default start in foreground
 
 	_s._parseCommandLine()
 	_s._readConfigFile()
