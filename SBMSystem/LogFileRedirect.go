@@ -53,7 +53,7 @@ func (_s *LogFile) OFF() {
 func (_s *LogFile) Log(msg ...interface{}) {
 	var message = string("")
 	for _, x := range msg {
-		message = fmt.Sprintf("%s %v", message, x)
+		message = fmt.Sprintf("%s%v", message, x)
 	}
 	message = strings.Trim(message, " ")
 	_s.lineLog.Printf("%v", message)

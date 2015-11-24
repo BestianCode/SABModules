@@ -9,6 +9,7 @@ import (
 )
 
 type ReadJSONConfig struct {
+	Silent      string
 	Config_file string
 	Daemon_mode string
 	Conf        struct {
@@ -50,6 +51,11 @@ type ReadJSONConfig struct {
 		UDR_WatchList       [][]string
 		UDR_Shell           string
 		UDR_ShellExecParam  string
+		SQH_LogPasswords    string
+		SQH_SQL_Engine      string
+		SQH_SQL_UserCheck   string
+		SQH_SQL_PassCheck   string
+		SQH_LDAP_URL        [][]string
 	}
 }
 
@@ -69,12 +75,14 @@ func (_s *ReadJSONConfig) Init(defLog, defCFG string) {
 	_s._parseCommandLine()
 	_s._readConfigFile()
 
-	fmt.Printf("Configuration file: %s\n", _s.Config_file)
-	fmt.Printf("          Log file: %s\n", _s.Conf.LOG_File)
-	fmt.Printf("          PID file: %s\n", _s.Conf.PID_File)
-	fmt.Printf("       Daemon mode: %s\n", _s.Daemon_mode)
-	fmt.Printf("\n")
-	fmt.Printf("\n")
+	if _s.Silent != "silent" {
+		fmt.Printf("Configuration file: %s\n", _s.Config_file)
+		fmt.Printf("          Log file: %s\n", _s.Conf.LOG_File)
+		fmt.Printf("          PID file: %s\n", _s.Conf.PID_File)
+		fmt.Printf("       Daemon mode: %s\n", _s.Daemon_mode)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+	}
 }
 
 func (_s *ReadJSONConfig) Update() {
