@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -15,9 +18,10 @@ const (
 )
 
 type LogFile struct {
-	LL      int
-	flog    *os.File
-	lineLog *log.Logger
+	LL       int
+	flog     *os.File
+	lineLog  *log.Logger
+	loglevel int
 }
 
 func (_s *LogFile) ON(conf ReadJSONConfig) {
@@ -36,8 +40,9 @@ func (_s *LogFile) ON(conf ReadJSONConfig) {
 
 	_s.lineLog = log.New(_s.flog, "", log.Ldate|log.Ltime)
 
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	//log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	log.SetOutput(_s.flog)
+	_s.loglevel = conf.Conf.LogLevel
 }
 
 func (_s *LogFile) OFF() {
@@ -56,7 +61,35 @@ func (_s *LogFile) Log(msg ...interface{}) {
 		message = fmt.Sprintf("%s%v", message, x)
 	}
 	message = strings.Trim(message, " ")
+
 	_s.lineLog.Printf("%v", message)
+}
+
+func (_s *LogFile) LogDbg(ll int, msg ...interface{}) {
+	var message = string("")
+	for _, x := range msg {
+		message = fmt.Sprintf("%s%v", message, x)
+	}
+	message = strings.Trim(message, " ")
+
+	pc, _, line, _ := runtime.Caller(1)
+	func_and_line := runtime.FuncForPC(pc).Name() + ":" + strconv.Itoa(line)
+	tmestamp := time.Now().Format(time.StampMilli)
+
+	if ll <= _s.loglevel {
+		switch ll {
+		case LLError:
+			log.Println(tmestamp, "[Error]", func_and_line, message)
+		case LLWarning:
+			//log.Println(tmestamp, "[Warning]", func_and_line, message)
+			log.Println(tmestamp, "[Warning]", message)
+		case LLInfo:
+			//log.Println(tmestamp, "[Info]", func_and_line, message)
+			log.Println(tmestamp, "[Info]", message)
+		case LLTrace:
+			log.Println(tmestamp, "[Trace]", func_and_line, message)
+		}
+	}
 }
 
 func (_s *LogFile) Hello(pName, pVer string) {

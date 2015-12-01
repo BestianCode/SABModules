@@ -1,9 +1,6 @@
 package SBMConnect
 
 import (
-	"log"
-	//"strings"
-
 	// LDAP
 	"github.com/go-ldap/ldap"
 
@@ -17,7 +14,7 @@ type LDAP struct {
 	D  *ldap.Conn
 }
 
-func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig) int {
+func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig, rLog SBMSystem.LogFile) int {
 	var (
 		attemptCounter = int(0)
 		err            error
@@ -27,7 +24,7 @@ func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig) int {
 
 	for {
 		if attemptCounter > len(conf.Conf.LDAP_URL)*2 {
-			log.Printf("LDAP Init SRV ***** Error connect to all LDAP servers !!!")
+			rLog.LogDbg(0, "LDAP Init SRV ***** Error connect to all LDAP servers !!!")
 			return -1
 		}
 
@@ -35,7 +32,7 @@ func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig) int {
 			LDAPCounter = 0
 		}
 
-		log.Printf("LDAP Init SRV ***** Trying connect to server %d of %d: %s", LDAPCounter+1, len(conf.Conf.LDAP_URL), conf.Conf.LDAP_URL[LDAPCounter][0])
+		rLog.LogDbg(2, "LDAP Init SRV ***** Trying connect to server ", LDAPCounter+1, " of ", len(conf.Conf.LDAP_URL), ": ", conf.Conf.LDAP_URL[LDAPCounter][0])
 		_s.D, err = ldap.Dial("tcp", conf.Conf.LDAP_URL[LDAPCounter][0])
 		if err != nil {
 			LDAPCounter++
@@ -43,7 +40,7 @@ func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig) int {
 			continue
 		}
 
-		log.Printf("LDAP Init SRV ***** Success! Connected to server %d of %d: %s", LDAPCounter+1, len(conf.Conf.LDAP_URL), conf.Conf.LDAP_URL[LDAPCounter][0])
+		rLog.LogDbg(2, "LDAP Init SRV ***** Success! Connected to server ", LDAPCounter+1, " of ", len(conf.Conf.LDAP_URL), ": ", conf.Conf.LDAP_URL[LDAPCounter][0])
 		LDAPCounter++
 		break
 	}
@@ -52,7 +49,7 @@ func (_s *LDAP) Init(conf SBMSystem.ReadJSONConfig) int {
 
 	err = _s.D.Bind(conf.Conf.LDAP_URL[0][1], conf.Conf.LDAP_URL[0][2])
 	if err != nil {
-		log.Printf("LDAP::Bind() error: %v\n", err)
+		rLog.LogDbg(0, "LDAP::Bind() to server ", conf.Conf.LDAP_URL[LDAPCounter][0], " with login ", conf.Conf.LDAP_URL[0][1], " error: ", err)
 		return -1
 	}
 
@@ -65,11 +62,11 @@ func (_s *LDAP) InitS(rLog SBMSystem.LogFile, user, password, server string) int
 
 	_s.CS = -1
 
-	log.Printf("LDAP Init SRV ***** Trying connect to server %s with login %s.", server, user)
+	rLog.LogDbg(2, "LDAP Init SRV ***** Trying connect to server ", server, " with login ", user)
 
 	_s.D, err = ldap.Dial("tcp", server)
 	if err != nil {
-		log.Printf("LDAP::Dial() error: %v\n", err)
+		rLog.LogDbg(0, "LDAP::Dial() to server ", server, " error: ", err)
 		return -1
 	}
 
@@ -77,11 +74,11 @@ func (_s *LDAP) InitS(rLog SBMSystem.LogFile, user, password, server string) int
 
 	err = _s.D.Bind(user, password)
 	if err != nil {
-		log.Printf("LDAP::Bind() error: %v\n", err)
+		rLog.LogDbg(1, "LDAP::Bind() to server ", server, " with login ", user, " error: ", err)
 		return -1
 	}
 
-	log.Printf("LDAP Init SRV ***** Success! Connected to server %s with login %s.", server, user)
+	rLog.LogDbg(2, "LDAP Init SRV ***** Success! Connected to server ", server, " with login ", user)
 
 	_s.CS = 0
 	return 0
@@ -92,7 +89,7 @@ func (_s *LDAP) CheckGroupMember(rLog SBMSystem.LogFile, user, group, baseDN str
 		recurs_count = 10
 	)
 
-	log.Printf("LDAP CheckGroupMember...")
+	rLog.LogDbg(2, "LDAP CheckGroupMember...")
 
 	userDN := _s._getBaseDN(rLog, user, baseDN)
 	groupDN := _s._getBaseDN(rLog, group, baseDN)
@@ -127,7 +124,7 @@ func (_s *LDAP) _checkGroupMember(rLog SBMSystem.LogFile, userDN, groupDN, baseD
 	lsearch := ldap.NewSearchRequest(userDN, 0, ldap.NeverDerefAliases, 0, 0, false, "(objectclass=*)", uattr, nil)
 	sr, err := _s.D.Search(lsearch)
 	if err != nil {
-		log.Printf("LDAP::Search() error: %v\n", err)
+		rLog.LogDbg(0, "LDAP::Search() ", userDN, " error: ", err)
 	}
 
 	if len(sr.Entries) > 0 {
@@ -159,7 +156,7 @@ func (_s *LDAP) _getBaseDN(rLog SBMSystem.LogFile, search, basedn string) string
 	lsearch := ldap.NewSearchRequest(basedn, 2, ldap.NeverDerefAliases, 0, 0, false, search, uattr, nil)
 	sr, err := _s.D.Search(lsearch)
 	if err != nil {
-		log.Printf("LDAP::Search() error: %v\n", err)
+		rLog.LogDbg(0, "LDAP::Search() ", basedn, " error: ", err)
 	}
 
 	if len(sr.Entries) > 0 {

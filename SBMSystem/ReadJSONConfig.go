@@ -58,6 +58,9 @@ type ReadJSONConfig struct {
 		SQH_LDAP_URL        [][]string
 		SQH_AD_GroupMember  string
 		CardDAVIPSuffix     []string
+		E2O_passwd          string
+		E2O_roster          string
+		E2O_vcard           string
 	}
 }
 
