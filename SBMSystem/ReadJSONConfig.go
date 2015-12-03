@@ -12,6 +12,7 @@ type ReadJSONConfig struct {
 	Silent      string
 	Config_file string
 	Daemon_mode string
+	Phase       string
 	Conf        struct {
 		PG_DSN              string
 		MY_DSN              string
@@ -52,15 +53,22 @@ type ReadJSONConfig struct {
 		UDR_Shell           string
 		UDR_ShellExecParam  string
 		SQH_LogPasswords    string
-		SQH_SQL_Engine      string
 		SQH_SQL_UserCheck   string
 		SQH_SQL_PassCheck   string
 		SQH_LDAP_URL        [][]string
 		SQH_AD_GroupMember  string
 		CardDAVIPSuffix     []string
+		SQL_Engine          string
+		E2O_JDomain         string
 		E2O_passwd          string
 		E2O_roster          string
 		E2O_vcard           string
+		E2O_OutXML          string
+		E2O_VCD_Engine      string
+		E2O_VCD_PG_DSN      string
+		E2O_VCD_MY_DSN      string
+		E2O_Name_Update     string
+		E2O_Name_PG_DSN     string
 	}
 }
 
@@ -97,10 +105,11 @@ func (_s *ReadJSONConfig) Update() {
 func (_s *ReadJSONConfig) _parseCommandLine() {
 	cp := flag.String("config", _s.Config_file, "Path to Configuration file")
 	dp := flag.String("daemon", _s.Daemon_mode, "Fork as system daemon (YES or NO)")
+	pp := flag.String("phase", _s.Phase, "select work phase (1,2,3)")
 	flag.Parse()
 	_s.Config_file = *cp
 	_s.Daemon_mode = *dp
-
+	_s.Phase = *pp
 	//fmt.Println(*cp, "\n", *dp, "\n", os.Args, "\n")
 }
 
